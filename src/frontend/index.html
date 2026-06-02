@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WeChat Analysis Tool</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <div id="sidebar">
+        <div class="sb-header">
+            <h2>💬 WeChat Analysis</h2>
+            <input type="text" id="sb-search" placeholder="Search contacts..." oninput="filterSidebar()">
+        </div>
+        <div id="sidebar-list"></div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content">
+        <!-- Tabs -->
+        <div id="tabs">
+            <button class="tab-btn active" data-tab="overview" onclick="showPanel('overview')">Overview</button>
+            <button class="tab-btn" data-tab="timeline" onclick="showPanel('timeline')">Timeline</button>
+            <button class="tab-btn" data-tab="signals" onclick="showPanel('signals')">Signals</button>
+            <button class="tab-btn" data-tab="patterns" onclick="showPanel('patterns')">Patterns</button>
+            <button class="tab-btn" data-tab="deep" onclick="showPanel('deep')">Deep Profile</button>
+            <button class="tab-btn" data-tab="strategy" onclick="showPanel('strategy')">Strategy</button>
+            <button class="tab-btn" data-tab="schedule" onclick="showPanel('schedule')">Schedule</button>
+        </div>
+
+        <!-- Panel Content -->
+        <div id="panel-content">
+            <div class="empty">Please select a contact</div>
+        </div>
+    </div>
+
+    <!-- Load Data -->
+    <script src="../data/output/data_affinity.js"></script>
+    <script src="../data/output/data_chat.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

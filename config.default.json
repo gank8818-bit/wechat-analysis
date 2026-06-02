@@ -1,0 +1,30 @@
+{
+  "name": "wechat-analysis",
+  "version": "1.0.0",
+  "description": "WeChat chat analysis tool with AI and algorithm modes",
+  "mode": "algorithm",
+  "ai": {
+    "provider": "openai",
+    "api_key": "",
+    "model": "gpt-4o-mini",
+    "api_base": "https://api.openai.com/v1"
+  },
+  "wechat": {
+    "decrypted_path": "./data/raw/wechat-decrypted",
+    "output_path": "./data/output"
+  },
+  "analysis": {
+    "min_messages": 50,
+    "top_contacts": 35,
+    "topic_categories": [
+      "gaming", "school", "daily", "emotion", "entertainment",
+      "music", "plans", "food", "sports", "travel",
+      "tech", "work", "complaint", "care", "money",
+      "relationship", "photos", "holiday"
+    ]
+  },
+  "frontend": {
+    "title": "WeChat Chat Analysis",
+    "theme": "dark"
+  }
+}

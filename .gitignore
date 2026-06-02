@@ -1,0 +1,11 @@
+node_modules/
+data/raw/
+data/output/
+*.log
+.env
+config.json
+.DS_Store
+*.pyc
+__pycache__/
+.vscode/
+.idea/

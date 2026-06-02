@@ -1,0 +1,24 @@
+{
+  "name": "wechat-analysis",
+  "version": "1.0.0",
+  "description": "WeChat chat analysis tool with AI and algorithm modes",
+  "main": "src/build/build_strategy.js",
+  "scripts": {
+    "build": "node src/build/build_strategy.js",
+    "start": "open data/output/affinity_report.html"
+  },
+  "dependencies": {
+    "fs": "^0.0.1-security",
+    "path": "^0.12.7"
+  },
+  "devDependencies": {},
+  "keywords": [
+    "wechat",
+    "chat-analysis",
+    "relationship-analysis",
+    "ai",
+    "nlp"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}
