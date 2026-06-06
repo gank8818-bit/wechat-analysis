@@ -1,18 +1,68 @@
 {
   "name": "wechat-analysis",
-  "version": "1.0.0",
-  "description": "WeChat chat analysis tool with AI and algorithm modes",
-  "mode": "algorithm",
-  "ai": {
+  "version": "2.0.0",
+  "description": "WeChat chat analysis tool powered by LLM",
+
+  "llm": {
     "provider": "openai",
-    "api_key": "",
-    "model": "gpt-4o-mini",
-    "api_base": "https://api.openai.com/v1"
+    "providers": {
+      "openai": {
+        "api_key": "",
+        "model": "gpt-4o-mini",
+        "api_base": "https://api.openai.com/v1",
+        "label": "OpenAI (GPT-4o / GPT-4o-mini)"
+      },
+      "anthropic": {
+        "api_key": "",
+        "model": "claude-3-5-sonnet-20241022",
+        "api_base": "https://api.anthropic.com",
+        "label": "Anthropic (Claude 3.5 Sonnet)"
+      },
+      "gemini": {
+        "api_key": "",
+        "model": "gemini-1.5-flash",
+        "api_base": "https://generativelanguage.googleapis.com/v1beta",
+        "label": "Google (Gemini 1.5 Flash / Pro)"
+      },
+      "deepseek": {
+        "api_key": "",
+        "model": "deepseek-chat",
+        "api_base": "https://api.deepseek.com/v1",
+        "label": "DeepSeek (deepseek-chat / deepseek-reasoner)"
+      },
+      "qwen": {
+        "api_key": "",
+        "model": "qwen-max",
+        "api_base": "https://dashscope.aliyuncs.com/compatible-mode/v1",
+        "label": "Alibaba (Qwen-Max / Qwen-Plus)"
+      }
+    }
   },
+
+  "oauth": {
+    "enabled": false,
+    "providers": {
+      "google": {
+        "client_id": "",
+        "client_secret": "",
+        "redirect_uri": "http://localhost:8080/auth/google/callback",
+        "scopes": ["openid", "email", "profile"]
+      },
+      "github": {
+        "client_id": "",
+        "client_secret": "",
+        "redirect_uri": "http://localhost:8080/auth/github/callback",
+        "scopes": ["user:email"]
+      }
+    },
+    "session_secret": ""
+  },
+
   "wechat": {
     "decrypted_path": "./data/raw/wechat-decrypted",
     "output_path": "./data/output"
   },
+
   "analysis": {
     "min_messages": 50,
     "top_contacts": 35,
@@ -21,10 +71,14 @@
       "music", "plans", "food", "sports", "travel",
       "tech", "work", "complaint", "care", "money",
       "relationship", "photos", "holiday"
-    ]
+    ],
+    "sample_messages_per_contact": 30,
+    "max_tokens_per_request": 2000
   },
+
   "frontend": {
     "title": "WeChat Chat Analysis",
-    "theme": "dark"
+    "theme": "dark",
+    "port": 8080
   }
 }

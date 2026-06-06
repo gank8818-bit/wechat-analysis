@@ -1,66 +1,46 @@
-#!/bin/bash
-# run.sh — Full analysis pipeline
+#!/usr/bin/env bash
+# run.sh — Full pipeline: extract → analyze (LLM) → build → open report
+set -e
 
-set -e  # Exit on error
+BASE="$(cd "$(dirname "$0")/.." && pwd)"
+cd "$BASE"
 
-BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$BASE_DIR"
+PYTHON="${PYTHON:-python3}"
+NODE="${NODE:-node}"
 
-echo "🔍 WeChat Analysis Tool"
-echo "======================================"
-echo ""
-
-# Check config
-if [ ! -f "config.json" ]; then
-    echo "⚠️  config.json not found, using default config"
-    cp config.default.json config.json
-    echo "📝  Please edit config.json with your settings"
+# ── Check config
+if [ ! -f config.json ]; then
+  echo "⚠️  config.json not found."
+  echo "   Run: cp config.default.json config.json"
+  echo "   Then add your LLM API key."
+  exit 1
 fi
 
-# Read mode from config
-MODE=$(python3 -c "import json; print(json.load(open('config.json'))['mode'])" 2>/dev/null || echo "algorithm")
-echo "🎯 Mode: $MODE"
+PROVIDER=$($PYTHON -c "import json; c=json.load(open('config.json')); print(c.get('llm',{}).get('provider','?'))" 2>/dev/null || echo "?")
+echo "🔌 Provider: $PROVIDER"
+
+# ── Step 1: Extract raw data from WeChat DB
 echo ""
+echo "📥 Step 1/3: Extracting contacts from WeChat DB…"
+$PYTHON src/extract/extract_contacts.py
+$PYTHON src/extract/extract_group_chats.py
 
-# Step 1: Extract contacts
-echo "📊 Step 1/4: Extracting contacts..."
-python3 src/extract/extract_contacts.py
+# ── Step 2: LLM analysis
+echo ""
+echo "🤖 Step 2/3: Running LLM analysis ($PROVIDER)…"
+$PYTHON src/analyze/analyzer.py "$@"
 
-if [ $? -ne 0 ]; then
-    echo "❌ Contact extraction failed"
-    exit 1
+# ── Step 3: Build HTML report
+echo ""
+echo "🏗️  Step 3/3: Building HTML report…"
+$NODE src/build/build_strategy.js
+
+# ── Open report
+REPORT="data/output/affinity_report.html"
+if [ -f "$REPORT" ]; then
+  echo ""
+  echo "✅ Done! Opening report…"
+  open "$REPORT" 2>/dev/null || xdg-open "$REPORT" 2>/dev/null || echo "Report: $BASE/$REPORT"
+else
+  echo "✅ Done! Report: $BASE/data/output/"
 fi
-
-# Step 2: Extract group chats
-echo ""
-echo "💬 Step 2/4: Extracting group chats..."
-python3 src/extract/extract_group_chats.py || echo "⚠️  Group chat extraction skipped (no data)"
-
-# Step 3: Run analysis (algorithm or AI)
-echo ""
-echo "🧠 Step 3/4: Running analysis ($MODE mode)..."
-python3 src/analyze/analyzer.py
-
-if [ $? -ne 0 ]; then
-    echo "❌ Analysis failed"
-    exit 1
-fi
-
-# Step 4: Build frontend
-echo ""
-echo "🏗️  Step 4/4: Building frontend..."
-node src/build/build_strategy.js
-
-if [ $? -ne 0 ]; then
-    echo "❌ Build failed"
-    exit 1
-fi
-
-# Done!
-echo ""
-echo "✅ Analysis complete!"
-echo "======================================"
-echo "📱 Open the report:"
-echo "   open data/output/affinity_report.html"
-echo ""
-echo "🎉 Done!"

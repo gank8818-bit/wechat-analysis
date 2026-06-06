@@ -1,39 +1,36 @@
 # WeChat Analysis Tool 🔍
 
-A powerful WeChat chat analysis tool that helps you understand your relationships and conversation patterns. Supports **two analysis modes**: pure algorithm (free, fast, offline) and AI-powered (accurate, context-aware).
+A WeChat chat analysis tool powered entirely by LLM APIs — no rule-based heuristics, no local ML models. Feed it your decrypted WeChat database and it produces deep relationship insights, communication strategies, and topic analysis for all your contacts.
 
 ## ✨ Features
 
-- **Contact Affinity Scoring** — Quantitatively measure relationship closeness
-- **Topic Analysis** — Auto-classify conversations into 16 categories (gaming, school, daily life, emotions, etc.)
-- **Group Chat Analysis** — Extract and analyze group chat messages with contact mapping
-- **Interactive Dashboard** — Beautiful HTML report with multiple views (overview, timeline, signals, patterns, deep profile, strategy, quiz, schedule)
-- **Evidence-Based Insights** — See actual message samples with keyword highlighting
-- **Two Analysis Modes**:
-  - 🤖 **Algorithm Mode** — Pure rule-based analysis, no API needed
-  - 🧠 **AI Mode** — LLM-powered analysis for deeper insights
+- **LLM-Powered Analysis** — Affinity scoring, topic extraction, and strategy generation via your choice of 5 AI providers
+- **5 Provider Options** — DeepSeek, Qwen, GPT, Claude, Gemini (switchable in one config line)
+- **Contact Affinity Scoring** — Quantitative closeness scores with dimensional breakdown
+- **Topic Analysis** — AI-classified conversation themes with evidence quotes
+- **Group Chat Analysis** — Extract and cross-reference group chat messages per contact
+- **Communication Strategy** — Personalized boosters, landmines, and next steps per contact
+- **Deep Profile** — Personality traits, values, and communication patterns
+- **OAuth Login** — Optional Google + GitHub login to gate access to your report
+- **Interactive Dashboard** — HTML report with multi-view layout (overview, timeline, deep profile, strategy, schedule)
 
-## 🎯 Two Modes
+## 🤖 Supported LLM Providers
 
-### Algorithm Mode (Default)
-- Uses keyword matching and rule-based scoring
-- No API key required
-- Fast, free, works offline
-- Good for: privacy-conscious users, quick analysis
-
-### AI Mode
-- Uses LLM API (OpenAI/Claude/Local) for analysis
-- More accurate topic classification
-- Better sentiment analysis
-- Deeper relationship insights
-- Good for: professional analysis, nuanced conversations
+| Provider | Models | Notes |
+|----------|--------|-------|
+| **DeepSeek** | `deepseek-chat`, `deepseek-reasoner` | Best value, fast, Chinese-language excellent |
+| **Qwen** | `qwen-max`, `qwen-plus`, `qwen-turbo` | Alibaba Cloud — excellent Chinese understanding |
+| **OpenAI** | `gpt-4o-mini`, `gpt-4o`, `o1-mini` | Best overall quality |
+| **Anthropic** | `claude-3-5-sonnet`, `claude-3-haiku` | Best for nuanced analysis |
+| **Gemini** | `gemini-1.5-flash`, `gemini-1.5-pro` | Good multilingual, generous free tier |
 
 ## 📦 Installation
 
 ### Prerequisites
 - Python 3.8+
 - Node.js 16+
-- Decrypted WeChat database files
+- Decrypted WeChat database files (`contact.db`, `message_0.db`, `message_1.db`)
+- An API key from any of the 5 supported providers
 
 ### Setup
 
@@ -42,24 +39,47 @@ A powerful WeChat chat analysis tool that helps you understand your relationship
 git clone https://github.com/yourusername/wechat-analysis.git
 cd wechat-analysis
 
-# Install Python dependencies
-pip install -r requirements.txt
+# Install dependencies (minimal — no ML libs required)
+pip install python-dateutil
 
 # Install Node.js dependencies
 npm install
 
-# Copy and edit config
+# Configure
 cp config.default.json config.json
-# Edit config.json with your settings
 ```
+
+Edit `config.json` — the only required change is your API key:
+
+```json
+{
+  "llm": {
+    "provider": "deepseek",
+    "providers": {
+      "deepseek": {
+        "api_key": "sk-your-deepseek-key-here",
+        "model": "deepseek-chat"
+      }
+    }
+  }
+}
+```
+
+## 🔑 Getting API Keys
+
+| Provider | Sign up | Pricing |
+|----------|---------|---------|
+| **DeepSeek** | https://platform.deepseek.com | ~$0.001/1K tokens (very cheap) |
+| **Qwen** | https://dashscope.aliyuncs.com | Free tier + pay-as-you-go |
+| **OpenAI** | https://platform.openai.com | $0.15–$2.50/1M tokens |
+| **Anthropic** | https://console.anthropic.com | $0.25–$3/1M tokens |
+| **Gemini** | https://aistudio.google.com | Free tier (60 req/min) |
 
 ## 🚀 Usage
 
 ### Step 1: Prepare WeChat Data
 
-You need decrypted WeChat database files. Use tools like [WeChatDecrypt](https://github.com/yourusername/wechat-decrypt) to decrypt your WeChat data.
-
-Place the decrypted files in `data/raw/wechat-decrypted/`:
+Place your decrypted WeChat databases here:
 ```
 data/raw/wechat-decrypted/
 ├── contact/
@@ -69,157 +89,127 @@ data/raw/wechat-decrypted/
     └── message_1.db
 ```
 
-### Step 2: Configure
+### Step 2: Test API connection
+```bash
+python test_connection.py
+```
 
-Edit `config.json`:
+### Step 3: Run full pipeline
+```bash
+./scripts/run.sh
+```
+
+This runs:
+1. Extract contacts + messages from WeChat DB
+2. LLM analysis for all contacts
+3. Build HTML report
+
+### Run options
+```bash
+# Analyze only one contact
+./scripts/run.sh --contact "Alice"
+
+# Analyze first 10 contacts
+./scripts/run.sh --limit 10
+
+# Skip contacts already analyzed (for resuming)
+./scripts/run.sh --skip-analyzed
+
+# Switch provider temporarily (overrides config.json)
+LLM_PROVIDER=gemini ./scripts/run.sh
+```
+
+## 🔐 OAuth Login (Optional)
+
+To protect your report with a login wall:
+
+1. Create an OAuth app on [Google Cloud Console](https://console.cloud.google.com/) or [GitHub Developer Settings](https://github.com/settings/developers)
+2. Set redirect URI to `http://localhost:8080/auth/google/callback` (or github)
+3. Add credentials to `config.json`:
+
 ```json
 {
-  "mode": "algorithm",  // or "ai"
-  "ai": {
-    "provider": "openai",  // or "anthropic", "local"
-    "api_key": "your-api-key",
-    "model": "gpt-4o-mini"
-  },
-  "wechat": {
-    "decrypted_path": "./data/raw/wechat-decrypted",
-    "output_path": "./data/output"
+  "oauth": {
+    "enabled": true,
+    "providers": {
+      "google": {
+        "client_id": "your-google-client-id.apps.googleusercontent.com",
+        "client_secret": "your-google-client-secret"
+      },
+      "github": {
+        "client_id": "your-github-client-id",
+        "client_secret": "your-github-client-secret"
+      }
+    }
   }
 }
 ```
 
-### Step 3: Run Analysis
-
+4. Start the auth server:
 ```bash
-# Full pipeline
-./scripts/run.sh
-
-# Or step by step:
-# 1. Extract contacts
-python src/extract/extract_contacts.py
-
-# 2. Extract group chats
-python src/extract/extract_group_chats.py
-
-# 3. Analyze (algorithm or AI mode based on config)
-python src/analyze/analyzer.py
-
-# 4. Build frontend
-node src/build/build_strategy.js
-
-# 5. Open the report
-open data/output/affinity_report.html
+python src/auth/oauth.py
 ```
 
-## 📊 Output
+5. Open `http://localhost:8080/auth/login` to log in
 
-The tool generates an interactive HTML report with:
-
-- **Overview** — Contact tiers, message counts, recency
-- **Timeline** — Message history over time
-- **Signals** — Emotional signals, care patterns
-- **Patterns** — Conversation patterns and rhythms
-- **Deep Profile** — In-depth relationship analysis
-- **Strategy** — Conversation strategy with evidence
-- **Quiz** — Test your knowledge of the relationship
-- **Schedule** — Conversation schedule and frequency
-
-## 🏗️ Project Structure
+## 📁 Project Structure
 
 ```
 wechat-analysis/
-├── config.default.json     # Default configuration
-├── config.json            # Your configuration (gitignored)
-├── package.json           # Node.js dependencies
-├── requirements.txt       # Python dependencies
-├── README.md
-├── LICENSE
-├── .gitignore
+├── config.default.json      # Default config (commit this)
+├── config.json              # Your config (gitignored)
+├── test_connection.py       # Test LLM API connection
 │
 ├── src/
-│   ├── extract/           # Data extraction scripts
-│   │   ├── extract_contacts.py
-│   │   └── extract_group_chats.py
-│   ├── analyze/           # Analysis modules
-│   │   ├── analyzer.py   # Main dispatcher (algorithm/AI)
-│   │   ├── algorithm.py  # Pure algorithm analysis
-│   │   └── ai.py        # AI-powered analysis
-│   ├── build/             # Build scripts
-│   │   └── build_strategy.js
-│   └── frontend/         # Frontend files
-│       ├── index.html
-│       ├── app.js
-│       └── style.css
+│   ├── extract/
+│   │   ├── extract_contacts.py    # Extract from WeChat DB
+│   │   └── extract_group_chats.py # Extract group chat data
+│   ├── analyze/
+│   │   ├── ai.py                  # Unified LLM client (5 providers)
+│   │   └── analyzer.py            # Main analysis pipeline
+│   ├── auth/
+│   │   └── oauth.py               # Google + GitHub OAuth
+│   ├── build/
+│   │   └── build_strategy.js      # Build HTML report
+│   └── frontend/
+│       ├── index.html             # Report template
+│       ├── app.js                 # Frontend logic
+│       └── style.css              # Styles
 │
 ├── data/
-│   ├── raw/              # Raw input data (gitignored)
-│   └── output/           # Generated output (gitignored)
+│   ├── raw/wechat-decrypted/      # Your WeChat DB files (gitignored)
+│   └── output/                    # Generated reports (gitignored)
 │
 └── scripts/
-    ├── run.sh            # Full pipeline script
-    └── setup.sh          # Setup script
-```
-
-## ⚙️ Configuration
-
-### Mode Selection
-```json
-{
-  "mode": "algorithm"  // or "ai"
-}
-```
-
-### AI Configuration
-```json
-{
-  "ai": {
-    "provider": "openai",  // "openai" | "anthropic" | "local"
-    "api_key": "sk-...",
-    "model": "gpt-4o-mini",
-    "api_base": "https://api.openai.com/v1"  // optional for local LLM
-  }
-}
-```
-
-### Analysis Parameters
-```json
-{
-  "analysis": {
-    "min_messages": 50,      // Minimum messages to include contact
-    "top_contacts": 35,      // Maximum contacts to analyze
-    "topic_categories": [...] // Topic categories to analyze
-  }
-}
+    ├── setup.sh                   # First-time setup
+    └── run.sh                     # Full pipeline runner
 ```
 
 ## 🔒 Privacy
 
-- **Algorithm Mode**: All analysis happens locally, no data leaves your machine
-- **AI Mode**: Message data is sent to the configured AI API. Use local LLM for privacy
-- No data is collected by the tool authors
-- We recommend using local LLM (Ollama, LM Studio) for sensitive data
+- All data stays local — nothing is uploaded except the text you send to the LLM API
+- The LLM API receives only message text samples (not your full database)
+- `data/` and `config.json` are gitignored by default — never commit your WeChat data
+- OAuth session stored locally at `data/.session.json`
+
+## 🛠 Switching Providers
+
+One line change in `config.json`:
+
+```json
+{
+  "llm": {
+    "provider": "anthropic"  // change to: openai | anthropic | gemini | deepseek | qwen
+  }
+}
+```
+
+Each provider can have its own key and model set — they don't interfere with each other.
 
 ## 🤝 Contributing
 
-Contributions welcome! Please:
+PRs welcome. Adding a new provider takes ~20 lines in `src/analyze/ai.py` — see the `PROVIDER_DEFAULTS` dict.
 
-1. Fork the repo
-2. Create a feature branch
-3. Submit a pull request
+## 📄 License
 
-## 📝 License
-
-MIT License — see [LICENSE](LICENSE) file for details.
-
-## ⚠️ Disclaimer
-
-This tool is for **personal use only**. Respect privacy and local laws. Do not use to analyze others' conversations without consent.
-
-## 🙏 Acknowledgments
-
-- WeChat decryption tools
-- OpenAI/Anthropic for AI APIs
-- The open-source community
-
----
-
-**Made with ❤️ for better relationship understanding**
+MIT — see [LICENSE](LICENSE)

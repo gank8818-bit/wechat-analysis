@@ -1,3 +1,17 @@
-numpy
-pandas
-sqlite3
+# WeChat Analysis Tool — Python dependencies
+# No heavy ML libraries — analysis is LLM-powered via standard HTTP
+
+# HTTP requests (stdlib urllib is used; these are optional extras)
+httpx>=0.27.0          # optional: faster async HTTP (not required)
+
+# Data processing
+python-dateutil>=2.8.2  # date parsing helpers
+
+# No special deps needed for OpenAI/DeepSeek/Qwen — they use OpenAI-compatible API
+# No special deps needed for Gemini — uses standard REST API
+# No special deps needed for Anthropic — uses standard REST API
+
+# Optional: official SDKs (for convenience; the tool works without them)
+# openai>=1.35.0
+# anthropic>=0.28.0
+# google-generativeai>=0.7.0
